@@ -26,7 +26,7 @@ function fillCircle(context, x, y, radius, color = "green") {
 
     function step(timestamp) {
         if (!lastTimestamp) lastTimestamp = timestamp;
-        const dt = (timestamp - lastTimestamp) * 0.001; // Convert ms to seconds
+        const dt = (timestamp - lastTimestamp) * 0.01; // Convert ms to seconds
         lastTimestamp = timestamp;
 
         if (x + radius >= canvas.width || x - radius <= 0) dx = -dx;
@@ -45,9 +45,18 @@ function fillCircle(context, x, y, radius, color = "green") {
     document.addEventListener('keydown',event=>{
      switch(event.code){
         case 'KeyS':{
-            console.log("popp");
+            console.log("down");
         }
         break;
+        case 'KeyW':{
+            console.log("up");
+        }break;
+        case 'KeyA':{
+console.log("left");
+        }break;
+        case 'KeyD':{
+            console.log("right");
+        }break;
      }
     });
 })();
