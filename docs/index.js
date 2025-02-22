@@ -1,4 +1,17 @@
-function fillCircle(context, x, y, radius, color = "green") {
+class V2 {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    add(that) {
+        return new V2(this.x + that.x, this.y + that.y);
+    }
+    scale(scalar) {
+        return new V2(this.x * scalar, this.y * scalar);
+    }
+}
+
+function fillCircle(context, x, y, radius, color = "red") {
     context.beginPath();
     context.arc(x, y, radius, 0, 2 * Math.PI, false);
     context.fillStyle = color;
@@ -8,55 +21,50 @@ function fillCircle(context, x, y, radius, color = "green") {
 (() => {
     const canvas = document.getElementById("game");
     const context = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas(); 
-
-    const radius = 69;
-    let x = canvas.width / 2;
-    let y = canvas.height / 2;
-    let dx = 100;
-    let dy = 100;
+    const radius = 50;
+    const speed = 300;
     let lastTimestamp = 0;
+    let pos = new V2(200, 200);
+    let vel = new V2(0, 0);
+    let keysPressed = new Set();
+
+    let dirnmap = {
+        "KeyS": new V2(0, speed),
+        "KeyW": new V2(0, -speed),
+        "KeyA": new V2(-speed, 0),
+        "KeyD": new V2(speed, 0),
+    };
 
     function step(timestamp) {
         if (!lastTimestamp) lastTimestamp = timestamp;
-        const dt = (timestamp - lastTimestamp) * 0.01; // Convert ms to seconds
+        const dt = (timestamp - lastTimestamp) * 0.001;
         lastTimestamp = timestamp;
 
-        if (x + radius >= canvas.width || x - radius <= 0) dx = -dx;
-        if (y + radius >= canvas.height || y - radius <= 0) dy = -dy;
+        vel = new V2(0, 0); // Reset velocity
+        keysPressed.forEach((key) => {
+            if (dirnmap[key]) vel = vel.add(dirnmap[key]);
+        });
 
-        x += dx * dt;
-        y += dy * dt;
+        pos = pos.add(vel.scale(dt));
+
+        console.log(`Position: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}), Velocity: (${vel.x}, ${vel.y})`);
 
         context.clearRect(0, 0, canvas.width, canvas.height);
-        fillCircle(context, x, y, radius, "red");
+        fillCircle(context, pos.x, pos.y, radius, "red");
 
         window.requestAnimationFrame(step);
     }
 
     window.requestAnimationFrame(step);
-    document.addEventListener('keydown',event=>{
-     switch(event.code){
-        case 'KeyS':{
-            console.log("down");
-        }
-        break;
-        case 'KeyW':{
-            console.log("up");
-        }break;
-        case 'KeyA':{
-console.log("left");
-        }break;
-        case 'KeyD':{
-            console.log("right");
-        }break;
-     }
+
+    document.addEventListener("keydown", (event) => {
+        keysPressed.add(event.code);
+    });
+
+    document.addEventListener("keyup", (event) => {
+        keysPressed.delete(event.code);
     });
 })();
